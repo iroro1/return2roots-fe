@@ -4,39 +4,46 @@ import { useEffect } from "react";
 
 export function ScrollAnimations() {
   useEffect(() => {
-    // Scroll-triggered animations
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: "0px 0px -100px 0px",
-    };
+    if (typeof window === "undefined") return;
+    if (!("IntersectionObserver" in window)) return;
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-        }
-      });
-    }, observerOptions);
+    const elements = Array.from(
+      document.querySelectorAll(
+        ".lp-step, .lp-feature, .lp-testimonial"
+      )
+    );
 
-    // Observe all elements with scroll animation classes
-    const elements = document.querySelectorAll(".lp-step, .lp-feature, .lp-testimonial");
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            obs.unobserve(entry.target); // stop observing once visible
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "0px 0px -100px 0px",
+      }
+    );
+
     elements.forEach((el) => observer.observe(el));
 
-    // Parallax effect for hero image
     const handleScroll = () => {
       const heroBg = document.querySelector(".lp-hero-bg");
-      const heroImg = document.querySelector(".lp-hero-img");
-      if (heroBg && heroImg) {
-        const scrolled = window.pageYOffset;
-        const parallaxSpeed = 0.5;
-        heroBg.style.transform = `translateY(${scrolled * parallaxSpeed}px)`;
-      }
+      if (!heroBg) return;
+
+      const scrolled = window.scrollY;
+      heroBg.style.transform = `translateY(${scrolled * 0.5}px)`;
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      elements.forEach((el) => observer.unobserve(el));
+      observer.disconnect();
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
