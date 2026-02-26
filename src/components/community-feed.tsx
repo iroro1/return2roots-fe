@@ -44,209 +44,209 @@ function viewModeFromParams(searchParams: URLSearchParams): ViewMode {
 }
 
 export function CommunityFeed() {
-  const { data: session, status } = useSession();
-  const searchParams = useSearchParams();
-  const [viewMode, setViewMode] = useState<ViewMode>(() => viewModeFromParams(searchParams));
-  const [posts, setPosts] = useState<PostType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [content, setContent] = useState("");
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [imageError, setImageError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [commentByPost, setCommentByPost] = useState<Record<string, string>>({});
-  const [submittingComment, setSubmittingComment] = useState<string | null>(null);
-  const [profile, setProfile] = useState<ProfileExtension | null>(null);
-  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
-  const [followLoading, setFollowLoading] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // const { data: session, status } = useSession();
+  // const searchParams = useSearchParams();
+  // const [viewMode, setViewMode] = useState<ViewMode>(() => viewModeFromParams(searchParams));
+  // const [posts, setPosts] = useState<PostType[]>([]);
+  // const [loading, setLoading] = useState(true);
+  // const [content, setContent] = useState("");
+  // const [imageFiles, setImageFiles] = useState<File[]>([]);
+  // const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  // const [imageError, setImageError] = useState<string | null>(null);
+  // const [submitting, setSubmitting] = useState(false);
+  // const [commentByPost, setCommentByPost] = useState<Record<string, string>>({});
+  // const [submittingComment, setSubmittingComment] = useState<string | null>(null);
+  // const [profile, setProfile] = useState<ProfileExtension | null>(null);
+  // const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
+  // const [followLoading, setFollowLoading] = useState<string | null>(null);
+  // const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (status !== "authenticated" || !session?.user?.id) return;
-    fetch("/api/profile")
-      .then((r) => (r.ok ? r.json() : { profile: null }))
-      .then((d: { profile: ProfileExtension | null }) => setProfile(d.profile ?? null))
-      .catch(() => setProfile(null));
-  }, [status, session?.user?.id]);
+  // useEffect(() => {
+  //   if (status !== "authenticated" || !session?.user?.id) return;
+  //   fetch("/api/profile")
+  //     .then((r) => (r.ok ? r.json() : { profile: null }))
+  //     .then((d: { profile: ProfileExtension | null }) => setProfile(d.profile ?? null))
+  //     .catch(() => setProfile(null));
+  // }, [status, session?.user?.id]);
 
-  const fetchFollowing = useCallback(async () => {
-    if (status !== "authenticated" || !session?.user?.id) return;
-    const res = await fetch("/api/community/following");
-    if (res.ok) {
-      const d = (await res.json()) as { following?: string[] };
-      setFollowingIds(new Set(d.following ?? []));
-    }
-  }, [status, session?.user?.id]);
+  // const fetchFollowing = useCallback(async () => {
+  //   if (status !== "authenticated" || !session?.user?.id) return;
+  //   const res = await fetch("/api/community/following");
+  //   if (res.ok) {
+  //     const d = (await res.json()) as { following?: string[] };
+  //     setFollowingIds(new Set(d.following ?? []));
+  //   }
+  // }, [status, session?.user?.id]);
 
-  useEffect(() => {
-    if (status === "authenticated" && session?.user?.id) fetchFollowing();
-  }, [status, session?.user?.id, fetchFollowing]);
+  // useEffect(() => {
+  //   if (status === "authenticated" && session?.user?.id) fetchFollowing();
+  // }, [status, session?.user?.id, fetchFollowing]);
 
-  const fetchPosts = useCallback(async (mode: ViewMode) => {
-    setLoading(true);
-    let url = "/api/community/posts";
-    if (mode === "mine") url += "?mine=1";
-    else if (mode === "following") url += "?feed=following";
-    const res = await fetch(url);
-    if (res.ok) {
-      const data = (await res.json()) as { posts: PostType[] };
-      setPosts(data.posts ?? []);
-    }
-    setLoading(false);
-  }, []);
+  // const fetchPosts = useCallback(async (mode: ViewMode) => {
+  //   setLoading(true);
+  //   let url = "/api/community/posts";
+  //   if (mode === "mine") url += "?mine=1";
+  //   else if (mode === "following") url += "?feed=following";
+  //   const res = await fetch(url);
+  //   if (res.ok) {
+  //     const data = (await res.json()) as { posts: PostType[] };
+  //     setPosts(data.posts ?? []);
+  //   }
+  //   setLoading(false);
+  // }, []);
 
-  useEffect(() => {
-    setViewMode(viewModeFromParams(searchParams));
-  }, [searchParams]);
+  // useEffect(() => {
+  //   setViewMode(viewModeFromParams(searchParams));
+  // }, [searchParams]);
 
-  useEffect(() => {
-    fetchPosts(viewMode);
-  }, [viewMode, fetchPosts]);
+  // useEffect(() => {
+  //   fetchPosts(viewMode);
+  // }, [viewMode, fetchPosts]);
 
-  function switchView(mode: ViewMode) {
-    setViewMode(mode);
-    const params = new URLSearchParams();
-    if (mode === "mine") params.set("mine", "1");
-    else if (mode === "following") params.set("feed", "following");
-    const url = params.toString() ? `/community?${params}` : "/community";
-    window.history.replaceState(null, "", url);
-  }
+  // function switchView(mode: ViewMode) {
+  //   setViewMode(mode);
+  //   const params = new URLSearchParams();
+  //   if (mode === "mine") params.set("mine", "1");
+  //   else if (mode === "following") params.set("feed", "following");
+  //   const url = params.toString() ? `/community?${params}` : "/community";
+  //   window.history.replaceState(null, "", url);
+  // }
 
-  async function handleFollowToggle(targetUserId: string) {
-    if (!session?.user?.id || session.user.id === targetUserId) return;
-    setFollowLoading(targetUserId);
-    const isFollowing = followingIds.has(targetUserId);
-    try {
-      if (isFollowing) {
-        await fetch(`/api/community/follow?userId=${encodeURIComponent(targetUserId)}`, { method: "DELETE" });
-        setFollowingIds((prev) => {
-          const next = new Set(prev);
-          next.delete(targetUserId);
-          return next;
-        });
-      } else {
-        await fetch("/api/community/follow", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: targetUserId }),
-        });
-        setFollowingIds((prev) => new Set([...prev, targetUserId]));
-      }
-      if (viewMode === "following") fetchPosts("following");
-    } finally {
-      setFollowLoading(null);
-    }
-  }
+  // async function handleFollowToggle(targetUserId: string) {
+  //   if (!session?.user?.id || session.user.id === targetUserId) return;
+  //   setFollowLoading(targetUserId);
+  //   const isFollowing = followingIds.has(targetUserId);
+  //   try {
+  //     if (isFollowing) {
+  //       await fetch(`/api/community/follow?userId=${encodeURIComponent(targetUserId)}`, { method: "DELETE" });
+  //       setFollowingIds((prev) => {
+  //         const next = new Set(prev);
+  //         next.delete(targetUserId);
+  //         return next;
+  //       });
+  //     } else {
+  //       await fetch("/api/community/follow", {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({ userId: targetUserId }),
+  //       });
+  //       setFollowingIds((prev) => new Set([...prev, targetUserId]));
+  //     }
+  //     if (viewMode === "following") fetchPosts("following");
+  //   } finally {
+  //     setFollowLoading(null);
+  //   }
+  // }
 
-  function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const newFiles = Array.from(e.target.files ?? []);
-    setImageError(null);
-    const validNew: File[] = [];
-    for (const f of newFiles) {
-      if (!f.type.startsWith("image/")) {
-        setImageError("Please choose image files only.");
-        if (e.target) e.target.value = "";
-        return;
-      }
-      if (f.size > MAX_FILE_SIZE_CLIENT) {
-        setImageError("File too large. Max 50MB per image; server will compress smaller files.");
-        if (e.target) e.target.value = "";
-        return;
-      }
-      validNew.push(f);
-    }
-    const newPreviews = validNew.map((f) => URL.createObjectURL(f));
-    setImageFiles((prev) => [...prev, ...validNew].slice(0, MAX_POST_IMAGES));
-    setImagePreviews((prev) => {
-      const merged = [...prev, ...newPreviews].slice(0, MAX_POST_IMAGES);
-      const usedCount = merged.length - prev.length;
-      newPreviews.slice(usedCount).forEach((p) => URL.revokeObjectURL(p));
-      return merged;
-    });
-    if (e.target) e.target.value = "";
-  }
+  // function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+  //   const newFiles = Array.from(e.target.files ?? []);
+  //   setImageError(null);
+  //   const validNew: File[] = [];
+  //   for (const f of newFiles) {
+  //     if (!f.type.startsWith("image/")) {
+  //       setImageError("Please choose image files only.");
+  //       if (e.target) e.target.value = "";
+  //       return;
+  //     }
+  //     if (f.size > MAX_FILE_SIZE_CLIENT) {
+  //       setImageError("File too large. Max 50MB per image; server will compress smaller files.");
+  //       if (e.target) e.target.value = "";
+  //       return;
+  //     }
+  //     validNew.push(f);
+  //   }
+  //   const newPreviews = validNew.map((f) => URL.createObjectURL(f));
+  //   setImageFiles((prev) => [...prev, ...validNew].slice(0, MAX_POST_IMAGES));
+  //   setImagePreviews((prev) => {
+  //     const merged = [...prev, ...newPreviews].slice(0, MAX_POST_IMAGES);
+  //     const usedCount = merged.length - prev.length;
+  //     newPreviews.slice(usedCount).forEach((p) => URL.revokeObjectURL(p));
+  //     return merged;
+  //   });
+  //   if (e.target) e.target.value = "";
+  // }
 
-  function removeImage(index: number) {
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
-    setImagePreviews((prev) => {
-      URL.revokeObjectURL(prev[index]!);
-      return prev.filter((_, i) => i !== index);
-    });
-    setImageError(null);
-  }
+  // function removeImage(index: number) {
+  //   setImageFiles((prev) => prev.filter((_, i) => i !== index));
+  //   setImagePreviews((prev) => {
+  //     URL.revokeObjectURL(prev[index]!);
+  //     return prev.filter((_, i) => i !== index);
+  //   });
+  //   setImageError(null);
+  // }
 
-  async function handlePost(e: React.FormEvent) {
-    e.preventDefault();
-    if (!content.trim() || submitting) return;
-    setSubmitting(true);
-    setImageError(null);
-    try {
-      let imageUrls: string[] = [];
-      if (imageFiles.length > 0) {
-        const form = new FormData();
-        imageFiles.forEach((f) => form.append("file", f));
-        const up = await fetch("/api/upload", { method: "POST", body: form });
-        const upData = await up.json().catch(() => ({})) as { url?: string; urls?: string[]; error?: string };
-        if (!up.ok) {
-          setImageError(upData.error ?? "Upload failed.");
-          setSubmitting(false);
-          return;
-        }
-        imageUrls = Array.isArray(upData.urls) ? upData.urls : upData.url ? [upData.url] : [];
-      }
-      const res = await fetch("/api/community/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: content.trim(), imageUrls: imageUrls.length ? imageUrls : undefined }),
-      });
-      if (res.ok) {
-        setContent("");
-        setImageFiles([]);
-        imagePreviews.forEach((p) => URL.revokeObjectURL(p));
-        setImagePreviews([]);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-        await fetchPosts(viewMode === "mine");
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  // async function handlePost(e: React.FormEvent) {
+  //   e.preventDefault();
+  //   if (!content.trim() || submitting) return;
+  //   setSubmitting(true);
+  //   setImageError(null);
+  //   try {
+  //     let imageUrls: string[] = [];
+  //     if (imageFiles.length > 0) {
+  //       const form = new FormData();
+  //       imageFiles.forEach((f) => form.append("file", f));
+  //       const up = await fetch("/api/upload", { method: "POST", body: form });
+  //       const upData = await up.json().catch(() => ({})) as { url?: string; urls?: string[]; error?: string };
+  //       if (!up.ok) {
+  //         setImageError(upData.error ?? "Upload failed.");
+  //         setSubmitting(false);
+  //         return;
+  //       }
+  //       imageUrls = Array.isArray(upData.urls) ? upData.urls : upData.url ? [upData.url] : [];
+  //     }
+  //     const res = await fetch("/api/community/posts", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ content: content.trim(), imageUrls: imageUrls.length ? imageUrls : undefined }),
+  //     });
+  //     if (res.ok) {
+  //       setContent("");
+  //       setImageFiles([]);
+  //       imagePreviews.forEach((p) => URL.revokeObjectURL(p));
+  //       setImagePreviews([]);
+  //       if (fileInputRef.current) fileInputRef.current.value = "";
+  //       await fetchPosts(viewMode === "mine");
+  //     }
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // }
 
-  async function handleLike(postId: string) {
-    if (!session?.user) return;
-    try {
-      const res = await fetch(`/api/community/posts/${postId}/like`, { method: "POST" });
-      if (res.ok) {
-        const data = (await res.json()) as { post: PostType };
-        setPosts((prev) => prev.map((p) => (p.id === postId ? data.post : p)));
-      }
-    } catch {}
-  }
+  // async function handleLike(postId: string) {
+  //   if (!session?.user) return;
+  //   try {
+  //     const res = await fetch(`/api/community/posts/${postId}/like`, { method: "POST" });
+  //     if (res.ok) {
+  //       const data = (await res.json()) as { post: PostType };
+  //       setPosts((prev) => prev.map((p) => (p.id === postId ? data.post : p)));
+  //     }
+  //   } catch {}
+  // }
 
-  async function handleComment(postId: string) {
-    const text = commentByPost[postId]?.trim();
-    if (!text || !session?.user || submittingComment) return;
-    setSubmittingComment(postId);
-    try {
-      const res = await fetch(`/api/community/posts/${postId}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: text }),
-      });
-      if (res.ok) {
-        setCommentByPost((prev) => ({ ...prev, [postId]: "" }));
-        await fetchPosts(viewMode === "mine");
-      }
-    } finally {
-      setSubmittingComment(null);
-    }
-  }
+  // async function handleComment(postId: string) {
+  //   const text = commentByPost[postId]?.trim();
+  //   if (!text || !session?.user || submittingComment) return;
+  //   setSubmittingComment(postId);
+  //   try {
+  //     const res = await fetch(`/api/community/posts/${postId}/comments`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ content: text }),
+  //     });
+  //     if (res.ok) {
+  //       setCommentByPost((prev) => ({ ...prev, [postId]: "" }));
+  //       await fetchPosts(viewMode === "mine");
+  //     }
+  //   } finally {
+  //     setSubmittingComment(null);
+  //   }
+  // }
 
-  const isLoggedIn = status === "authenticated" && !!session?.user;
+  // const isLoggedIn = status === "authenticated" && !!session?.user;
 
   return (
     <div className="community-feed">
-      {isLoggedIn && (
+      {/* {isLoggedIn && (
         <form onSubmit={handlePost} className="community-composer card">
           <div className="community-composer-row">
             <span className="community-avatar community-avatar-sm" aria-hidden="true">
@@ -486,7 +486,7 @@ export function CommunityFeed() {
             );
           })}
         </ul>
-      )}
+      )} */}
     </div>
   );
 }
