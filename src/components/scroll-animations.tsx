@@ -33,9 +33,10 @@ export function ScrollAnimations() {
     elements.forEach((el) => observer.observe(el));
 
     const handleScroll = () => {
-      const heroBg = document.querySelector(".lp-hero-bg");
-      if (!heroBg) return;
+      const heroBg = document.querySelector<HTMLElement>(".lp-hero-bg");
 
+      if (!heroBg) return;
+      
       const scrolled = window.scrollY;
       heroBg.style.transform = `translateY(${scrolled * 0.5}px)`;
     };
