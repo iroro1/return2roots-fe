@@ -78,7 +78,7 @@ Message:
 ${formData.message || "No additional message"}
         `.trim();
 
-        const mailtoLink = `mailto:hello@returntoroots.com?subject=New Journey Inquiry from ${encodeURIComponent(formData.name)}&body=${encodeURIComponent(emailBody)}`;
+        const mailtoLink = `mailto:returntorootsafrica@gmail.com?subject=New Journey Inquiry from ${encodeURIComponent(formData.name)}&body=${encodeURIComponent(emailBody)}`;
         window.location.href = mailtoLink;
         
         setSubmitStatus("success");
@@ -225,7 +225,7 @@ ${formData.message || "No additional message"}
 
       {submitStatus === "error" && (
         <div className="lp-form-error">
-          Something went wrong. Please try again or email us directly at hello@returntoroots.com
+          Something went wrong. Please try again or email us directly at returntorootsafrica@gmail.com
         </div>
       )}
 

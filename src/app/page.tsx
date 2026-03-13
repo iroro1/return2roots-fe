@@ -254,7 +254,7 @@ export default function HomePage() {
               <p className="lp-footer-tagline">African cultural immersion · Starting in Ghana</p>
             </div>
             <div className="lp-footer-links">
-              <a href="mailto:hello@returntoroots.com" className="lp-footer-link">Contact</a>
+              <a href="mailto:returntorootsafrica@gmail.com" className="lp-footer-link">Contact</a>
               <a href="#how-it-works" className="lp-footer-link">How It Works</a>
               <a href="#start-journey" className="lp-footer-link">Start Journey</a>
             </div>
